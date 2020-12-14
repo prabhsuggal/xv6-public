@@ -111,6 +111,9 @@ found:
   p->context = (struct context*)sp;
   memset(p->context, 0, sizeof *p->context);
   p->context->eip = (uint)forkret;
+  p->ticks_passed = 0;
+  p->alarmhandler = 0;
+  p->alarmticks = 0;
 
   return p;
 }

@@ -25,6 +25,24 @@ int lazy_page_allocation(uint addr) {
   return 0;
 }
 
+// Handling Periodic alarms
+void periodic_tick(struct proc* proc, struct trapframe* tf){
+
+  if (proc->ticks_passed == proc->alarmticks) {
+    proc->ticks_passed = 0;
+    // we have to check whether tf->esp is valid or not because
+    // we do write operations of the area tf->esp points to.
+    if (tf->esp < KERNBASE) {
+
+      tf->esp -= 4;
+      *((uint *)(tf->esp)) = tf->eip;
+      // when trap return, it returns to the
+      // alarmhandler
+      tf->eip = (uint)proc->alarmhandler;
+    }
+  }
+}
+
 // Interrupt descriptor table (shared by all CPUs).
 struct gatedesc idt[256];
 extern uint vectors[];  // in vectors.S: array of 256 entry pointers
@@ -72,6 +90,12 @@ trap(struct trapframe *tf)
       release(&tickslock);
     }
     lapiceoi();
+    if(myproc() != 0 && (tf->cs & 3) == 3){
+      if(myproc()->alarmticks>0 && myproc()->alarmhandler){
+        myproc()->ticks_passed++;
+        periodic_tick(myproc(), tf);
+      }
+    }
     break;
   case T_IRQ0 + IRQ_IDE:
     ideintr();
