@@ -29,6 +29,12 @@ sys_alarm(void)
 }
 
 int
+sys_clear_alarm(){
+  myproc()->alarm_on = 0;
+  return 0;
+}
+
+int
 sys_exit(void)
 {
   exit();

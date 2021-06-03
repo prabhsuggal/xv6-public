@@ -32,9 +32,10 @@ void periodic_tick(struct proc* proc, struct trapframe* tf){
     proc->ticks_passed = 0;
     // we have to check whether tf->esp is valid or not because
     // we do write operations of the area tf->esp points to.
-    if (tf->esp < KERNBASE) {
-
+    if (tf->esp < KERNBASE && myproc()->alarm_on == 0) {
+      myproc()->alarm_on = 1;
       tf->esp -= 4;
+
       *((uint *)(tf->esp)) = tf->eip;
       // when trap return, it returns to the
       // alarmhandler

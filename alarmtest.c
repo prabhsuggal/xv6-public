@@ -20,5 +20,12 @@ main(int argc, char *argv[])
 void
 periodic()
 {
-  printf(1, "alarm!\n");
+  printf(1, "alarm!");
+  int i;
+  for(i = 0; i < 25*5000000; i++){
+    if((i % 250000) == 0)
+      write(2, "+", 1);
+  }
+  printf(1,"\n");
+  clear_alarm();
 }
